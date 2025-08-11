@@ -9,8 +9,8 @@ all: $(KERNEL_IMAGE) $(INITRAMFS)
 
 # Build the kernel
 $(KERNEL_IMAGE):
-	cd $(KERNEL_DIR) && make defconfig
-	cd $(KERNEL_DIR) && make -j$(nproc)
+	make -C $(KERNEL_DIR) defconfig
+	make -C $(KERNEL_DIR) -j$(nproc)
 
 # Build the initramfs from the rootfs directory
 $(INITRAMFS): $(ROOTFS_DIR)
@@ -27,6 +27,6 @@ run: all
 
 # Clean everything
 clean:
-	cd $(KERNEL_DIR) && make mrproper
+	make -C $(KERNEL_DIR) mrproper
 	rm -f $(INITRAMFS)
 

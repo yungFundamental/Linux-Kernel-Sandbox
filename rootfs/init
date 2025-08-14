@@ -8,5 +8,9 @@
 mount -t proc proc /proc
 mount -t sysfs sysfs /sys
 mount -t devtmpfs devtmpfs /dev
+mount -t debugfs debugfs /sys/kernel/debug
+
+# Add atkbd.c to debug control
+echo 'file atkbd.c +p' > /sys/kernel/debug/dynamic_debug/control
 
 exec /bin/sh

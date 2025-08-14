@@ -16,10 +16,36 @@ $(KERNEL_DIR)/.config:
 		$(MAKE) -C $(KERNEL_DIR) defconfig; \
 	fi
 
+debug-full: $(KERNEL_DIR)/.config
+	@echo "Enabling FULL DEBUG mode..."
+	@$(MAKE) -C $(KERNEL_DIR) olddefconfig
+	@$(KERNEL_DIR)/scripts/config --file $(KERNEL_DIR)/.config \
+		--enable DEBUG_KERNEL \
+		--enable DEBUG_INFO \
+		--enable DEBUG_INFO_DWARF4 \
+		--enable DEBUG_FS \
+		--enable DEBUG_BUGVERBOSE \
+		--enable DYNAMIC_DEBUG \
+		--enable DYNAMIC_DEBUG_CORE
+	@echo "FULL DEBUG mode enabled."
+
+# Lightweight debug mode: keep dynamic debug but no big symbols
+debug-lite: $(KERNEL_DIR)/.config
+	@echo "Enabling LIGHTWEIGHT DEBUG mode..."
+	@$(KERNEL_DIR)/scripts/config --file $(KERNEL_DIR)/.config \
+		--disable DEBUG_KERNEL \
+		--disable DEBUG_INFO \
+		--disable DEBUG_INFO_DWARF4 \
+		--enable DEBUG_FS \
+		--enable DEBUG_BUGVERBOSE \
+		--enable DYNAMIC_DEBUG \
+		--enable DYNAMIC_DEBUG_CORE
+	@echo "LIGHTWEIGHT DEBUG mode enabled."
+
 # Build the kernel
 $(KERNEL_IMAGE): $(KERNEL_DIR)/.config
 	$(MAKE) -C $(KERNEL_DIR) oldconfig
-	$(MAKE) -C $(KERNEL_DIR) -j$(nproc)
+	$(MAKE) -C $(KERNEL_DIR) -j1
 
 # Build the initramfs from the rootfs directory
 $(INITRAMFS): $(ROOTFS_DIR)
@@ -36,6 +62,6 @@ run: all
 
 # Clean everything
 clean:
-	$(MAKE) -C $(KERNEL_DIR) mrproper
+	$(MAKE) -C $(KERNEL_DIR) clean
 	rm -f $(INITRAMFS)
 

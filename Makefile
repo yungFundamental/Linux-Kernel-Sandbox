@@ -57,8 +57,7 @@ run: all
 	qemu-system-x86_64 \
 		-kernel $(KERNEL_IMAGE) \
 		-initrd $(INITRAMFS) \
-		-nographic \
-		-append "console=ttyS0"
+		-m 512M
 
 # Clean everything
 clean:

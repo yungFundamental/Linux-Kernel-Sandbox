@@ -7,10 +7,19 @@ KERNEL_IMAGE := $(KERNEL_DIR)/arch/x86/boot/bzImage
 
 all: $(KERNEL_IMAGE) $(INITRAMFS)
 
+# Use existing .config if it exists, otherwise run defconfig
+$(KERNEL_DIR)/.config:
+	@if [ -f "$(KERNEL_DIR)/.config" ]; then \
+		echo "Using existing kernel config"; \
+	else \
+		echo "No .config found, running defconfig"; \
+		$(MAKE) -C $(KERNEL_DIR) defconfig; \
+	fi
+
 # Build the kernel
-$(KERNEL_IMAGE):
-	make -C $(KERNEL_DIR) defconfig
-	make -C $(KERNEL_DIR) -j$(nproc)
+$(KERNEL_IMAGE): $(KERNEL_DIR)/.config
+	$(MAKE) -C $(KERNEL_DIR) oldconfig
+	$(MAKE) -C $(KERNEL_DIR) -j$(nproc)
 
 # Build the initramfs from the rootfs directory
 $(INITRAMFS): $(ROOTFS_DIR)
@@ -27,6 +36,6 @@ run: all
 
 # Clean everything
 clean:
-	make -C $(KERNEL_DIR) mrproper
+	$(MAKE) -C $(KERNEL_DIR) mrproper
 	rm -f $(INITRAMFS)
 
